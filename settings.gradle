@@ -1,1 +1,1 @@
-include ':app', ':proxy-preferences'
+include ':app', ':proxypref'
