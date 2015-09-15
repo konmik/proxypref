@@ -2,7 +2,11 @@
 
 ProxyPref is a simple Android library, which allows to easily access SharedPreferences.
 
-### Definition:
+### Definition
+
+Define an interface with types that are supported by `SharedPreferences`.
+
+Keys are method names from the interface, but without `set`/`get` prefixes.
 
 ``` java
     interface MyPreferences {
@@ -30,15 +34,20 @@ ProxyPref is a simple Android library, which allows to easily access SharedPrefe
     }
 ```
 
-### Initialization
+RxJava `rx.Observable` is supported.
+
+### Usage
+
+One line initialization.
 
 ``` java
-    SharedPreferences shared = getSharedPreferences("preferences", 0);
-    MyPreferences pref = ProxyPreferences.build(MyPreferences.class, shared);
+    MyPreferences pref = ProxyPreferences.build(MyPreferences.class, getSharedPreferences("preferences", 0));
+    pref.username();
 ```
 
-### Usage:
+### Dependency
 
 ``` guava
     compile 'info.android15.proxypref:proxypref:0.1.0'
 ```
+
