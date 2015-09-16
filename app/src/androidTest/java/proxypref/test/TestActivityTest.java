@@ -7,28 +7,40 @@ import android.test.UiThreadTest;
 import java.util.concurrent.atomic.AtomicReference;
 
 import proxypref.ProxyPreferences;
+import proxypref.annotation.DefaultSet;
+import proxypref.annotation.DefaultString;
 import rx.Observable;
 import rx.functions.Action1;
 
 public class TestActivityTest extends ActivityInstrumentationTestCase2<TestActivity> {
 
     interface MyPreferences {
+
         // access with get/set prefix
         String getTestString(); // key = testString
         void setTestString(String x); // key = testString
 
         // without get/set prefix
         Integer testInteger(); // key = testInteger
-        void testInteger(int x); // key = testInteger
-
-        // get with default value
-        Integer getValue(int defaultValue); // key = value
+        void testInteger(Integer x); // key = testInteger
 
         // observe with rx.Observable
         Observable<Integer> lastSelectedItem(); // key = lastSelectedItem
 
         // set with rx.functions.Action1
         Action1<Integer> setLastSelectedItem(); // key = lastSelectedItem
+
+        // ProGuard ready
+        @Preference("username")
+        String a12();               // key = username
+
+        // Default value
+        @DefaultString("user256")
+        String username();          // key = username
+
+        // Default set
+        @DefaultSet({"1", "2", "3"})
+        Set<String> getSomeSet();   // key = someSet
     }
 
     public TestActivityTest() {

@@ -9,7 +9,7 @@ import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 
 class Util {
-    // This method is copyright 2004 Square, Inc. and is taken from Retrofit under the Apache 2.0 license.
+    // This method is copyright 2013 Square, Inc. and is taken from Retrofit under the Apache 2.0 license.
     static Type getSingleParameterUpperBound(ParameterizedType type) {
         Type[] types = type.getActualTypeArguments();
         if (types.length != 1)
