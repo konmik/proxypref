@@ -10,7 +10,7 @@ import java.util.Set;
 import rx.Observable;
 import rx.functions.Action1;
 
-public class HandlerAssertionsTest {
+public class ProxyHandlerAssertionsTest {
 
     interface TotallyFailed {
 

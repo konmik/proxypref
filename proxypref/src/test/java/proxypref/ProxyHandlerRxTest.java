@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 import static proxypref.TestUtil.answerDefault;
 import static proxypref.TestUtil.answerValue;
 
-public class HandlerRxTest {
+public class ProxyHandlerRxTest {
 
     interface StringTest {
         Observable<String> testObservable();

@@ -1,7 +1,8 @@
-package proxypref;
+package proxypref.method;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -44,5 +45,13 @@ class Util {
             throw new IllegalArgumentException("Expected a Class, ParameterizedType, or "
                 + "GenericArrayType, but <" + type + "> is of type " + className);
         }
+    }
+
+    public static void throwMethod(Method method, String error) {
+        throw new IllegalArgumentException("Method: " + method.getDeclaringClass().getName() + "." + method.getName() + "\n" + error);
+    }
+
+    public static IllegalArgumentException illegalMethodException(Method method, String error) {
+        throw new IllegalArgumentException("Method: " + method.getDeclaringClass().getName() + "." + method.getName() + "\n" + error);
     }
 }

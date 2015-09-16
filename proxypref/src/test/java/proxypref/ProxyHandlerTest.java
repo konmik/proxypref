@@ -19,7 +19,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
-public class HandlerTest {
+public class ProxyHandlerTest {
     interface StringTest {
         String test();
         void test(String value);

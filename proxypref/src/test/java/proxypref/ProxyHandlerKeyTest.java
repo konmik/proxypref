@@ -8,7 +8,7 @@ import proxypref.annotation.Preference;
 
 import static org.junit.Assert.assertEquals;
 
-public class HandlerKeyTest {
+public class ProxyHandlerKeyTest {
 
     interface NameTests {
         String g();
@@ -37,11 +37,11 @@ public class HandlerKeyTest {
 
     private String getMethodKey(String name) throws NoSuchMethodException {
         Method method = NameTests.class.getDeclaredMethod(name);
-        return Handler.getPreferenceKey(Handler.getMethodType(method), method);
+        return ProxyHandler.getPreferenceKey(ProxyHandler.getMethodType(method), method);
     }
 
     private String getMethodKey(String name, Class<?>... parameterTypes) throws NoSuchMethodException {
         Method method = NameTests.class.getDeclaredMethod(name, parameterTypes);
-        return Handler.getPreferenceKey(Handler.getMethodType(method), method);
+        return ProxyHandler.getPreferenceKey(ProxyHandler.getMethodType(method), method);
     }
 }

@@ -25,7 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static proxypref.TestUtil.answerValue;
 
-public class HandlerTypesTest {
+public class ProxyHandlerTypesTest {
 
     interface TestTypes {
         String getString();
