@@ -1,9 +1,9 @@
-package proxypref;
+package proxypref.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Preference {
+public @interface DefaultString {
     String value();
 }

@@ -1,4 +1,4 @@
-package proxypref;
+package proxypref.method;
 
 import android.content.SharedPreferences;
 
