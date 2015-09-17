@@ -10,15 +10,19 @@ Define an interface with set/get method for types:
 Keys are method names from the interface, but without `set`/`get` prefixes.
 You can omit `set`/`get` part if you like.
 
-There is also `rx.Observable` and `Action1` interface support to chain
+Annotate fields with `Preference` annotation to set a preference key name if you're going to use ProGuard.
+
+##### RxJava
+
+There is also `rx.Observable` and `rx.functions.Action1` interface support to chain
 preferences into RxJava operators.
+
+##### null
 
 `null` is *does not exist* value. If you don't want to get nulls - define default values with
 `DefaultString`, `DefaultInteger`, `DefaultLong`, `DefaultFloat`, `DefaultBoolean`, `DefaultSet`.
 
-You can also remove a key-value pair from preferences by passing `null` into a set method.
-
-Annotate fields with `Preference` annotation to set a preference key name if you're going to use ProGuard.
+You can also remove a key-value pair from preferences by passing `null` into the set method.
 
 ``` java
 interface MyPreferences {
@@ -61,6 +65,15 @@ MyPreferences pref = ProxyPreferences
 
 Log.v("test", pref.username());
 ```
+
+##### OR
+
+``` java
+MyPreferences pref = ProxyPreferences
+    .buildWithRx(MyPreferences.class, getSharedPreferences("preferences", 0));
+```
+
+If you want to have RxJava features. Don't forget to include RxJava itself. ;)
 
 ### Dependency
 
