@@ -21,11 +21,6 @@ import static java.util.Arrays.asList;
 enum DataType {
     STRING {
         @Override
-        Object get(SharedPreferences pref, String key, Object defValue) {
-            return pref.getString(key, defValue == null ? "" : (String)defValue);
-        }
-
-        @Override
         void put(SharedPreferences pref, String key, Object value) {
             pref.edit().putString(key, (String)value).apply();
         }
@@ -33,15 +28,10 @@ enum DataType {
         @Override
         Object getDefaultValue(Method method) {
             DefaultString annotation = method.getAnnotation(DefaultString.class);
-            return annotation == null ? "" : annotation.value();
+            return annotation == null ? null : annotation.value();
         }
     },
     INTEGER {
-        @Override
-        Object get(SharedPreferences pref, String key, Object defValue) {
-            return pref.getInt(key, defValue == null ? 0 : (int)defValue);
-        }
-
         @Override
         void put(SharedPreferences pref, String key, Object value) {
             pref.edit().putInt(key, (int)value).apply();
@@ -50,15 +40,10 @@ enum DataType {
         @Override
         Object getDefaultValue(Method method) {
             DefaultInteger annotation = method.getAnnotation(DefaultInteger.class);
-            return annotation == null ? 0 : annotation.value();
+            return annotation == null ? null : annotation.value();
         }
     },
     LONG {
-        @Override
-        Object get(SharedPreferences pref, String key, Object defValue) {
-            return pref.getLong(key, defValue == null ? 0 : (long)defValue);
-        }
-
         @Override
         void put(SharedPreferences pref, String key, Object value) {
             pref.edit().putLong(key, (long)value).apply();
@@ -67,15 +52,10 @@ enum DataType {
         @Override
         Object getDefaultValue(Method method) {
             DefaultLong annotation = method.getAnnotation(DefaultLong.class);
-            return annotation == null ? 0 : annotation.value();
+            return annotation == null ? null : annotation.value();
         }
     },
     FLOAT {
-        @Override
-        Object get(SharedPreferences pref, String key, Object defValue) {
-            return pref.getFloat(key, defValue == null ? 0 : (float)defValue);
-        }
-
         @Override
         void put(SharedPreferences pref, String key, Object value) {
             pref.edit().putFloat(key, (float)value).apply();
@@ -84,15 +64,10 @@ enum DataType {
         @Override
         Object getDefaultValue(Method method) {
             DefaultFloat annotation = method.getAnnotation(DefaultFloat.class);
-            return annotation == null ? 0 : annotation.value();
+            return annotation == null ? null : annotation.value();
         }
     },
     BOOLEAN {
-        @Override
-        Object get(SharedPreferences pref, String key, Object defValue) {
-            return pref.getBoolean(key, defValue == null ? false : (boolean)defValue);
-        }
-
         @Override
         void put(SharedPreferences pref, String key, Object value) {
             pref.edit().putBoolean(key, (boolean)value).apply();
@@ -101,15 +76,10 @@ enum DataType {
         @Override
         Object getDefaultValue(Method method) {
             DefaultBoolean annotation = method.getAnnotation(DefaultBoolean.class);
-            return annotation == null ? false : annotation.value();
+            return annotation == null ? null : annotation.value();
         }
     },
     SET {
-        @Override
-        Object get(SharedPreferences pref, String key, Object defValue) {
-            return pref.getStringSet(key, defValue == null ? Collections.<String>emptySet() : (Set<String>)defValue);
-        }
-
         @Override
         void put(SharedPreferences pref, String key, Object value) {
             pref.edit().putStringSet(key, (Set<String>)value).apply();
@@ -118,7 +88,7 @@ enum DataType {
         @Override
         Object getDefaultValue(Method method) {
             DefaultSet annotation = method.getAnnotation(DefaultSet.class);
-            return annotation == null ? Collections.emptySet() : Collections.unmodifiableSet(new HashSet<>(asList(annotation.value())));
+            return annotation == null ? null : Collections.unmodifiableSet(new HashSet<>(asList(annotation.value())));
         }
     };
 
@@ -133,12 +103,12 @@ enum DataType {
             return FLOAT;
         if (cls.equals(Boolean.class))
             return BOOLEAN;
-        if (cls.equals(Set.class) && Util.getRawType(Util.getSingleParameterUpperBound((ParameterizedType)type)).equals(String.class))
+        if (cls.equals(Set.class) && type instanceof ParameterizedType &&
+            ((ParameterizedType)type).getActualTypeArguments()[0].equals(String.class))
             return SET;
-        throw new IllegalArgumentException("Invalid shared preferences type: " + cls.getName());
+        throw new IllegalArgumentException("Invalid shared preferences type: " + type.toString());
     }
 
-    abstract Object get(SharedPreferences pref, String key, Object defValue);
     abstract void put(SharedPreferences pref, String key, Object value);
     abstract Object getDefaultValue(Method method);
 }

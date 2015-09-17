@@ -9,7 +9,6 @@ import java.lang.reflect.Type;
 import proxypref.annotation.Preference;
 import rx.Observable;
 import rx.functions.Action1;
-import rx.functions.Func0;
 
 enum MethodType {
 
@@ -21,7 +20,8 @@ enum MethodType {
 
         @Override
         public Object invoke(DataType dataType, String key, SharedPreferences pref, Object[] args, Object defValue) {
-            return pref.contains(key) ? dataType.get(pref, key, defValue) : defValue;
+            Object value = pref.getAll().get(key);
+            return value == null ? defValue : value;
         }
     },
     SET(true) {
@@ -32,7 +32,10 @@ enum MethodType {
 
         @Override
         public Object invoke(DataType dataType, String key, SharedPreferences pref, Object[] args, Object defValue) {
-            dataType.put(pref, key, args[0]);
+            if (args[0] == null)
+                pref.edit().remove(key).apply();
+            else
+                dataType.put(pref, key, args[0]);
             return null;
         }
     },
@@ -43,13 +46,8 @@ enum MethodType {
         }
 
         @Override
-        public Object invoke(final DataType dataType, final String key, final SharedPreferences pref, Object[] args, final Object defValue) {
-            return Observable.create(new OnSharedPreferenceChangeListenerOnSubscribe(pref, key, new Func0() {
-                @Override
-                public Object call() {
-                    return pref.contains(key) ? dataType.get(pref, key, defValue) : null;
-                }
-            }));
+        public Object invoke(final DataType dataType, final String key, final SharedPreferences pref, final Object[] args, final Object defValue) {
+            return RxDelegate.createObservable(dataType, key, pref, args, defValue);
         }
     },
     ACTION(true) {
@@ -59,46 +57,39 @@ enum MethodType {
         }
 
         @Override
-        public Object invoke(final DataType dataType, final String key, final SharedPreferences pref, Object[] args, Object defValue) {
-            return new Action1() {
-                @Override
-                public void call(Object o) {
-                    dataType.put(pref, key, o);
-                }
-            };
+        public Object invoke(final DataType dataType, final String key, final SharedPreferences pref, final Object[] args, final Object defValue) {
+            return RxDelegate.createAction1(dataType, key, pref, defValue);
         }
     };
 
-    static MethodType from(Method method) {
+    static MethodType from(Method method, boolean rx) {
         Class<?> returnType = method.getReturnType();
+        boolean returnVoid = returnType.equals(Void.TYPE);
         int parameterCount = method.getParameterTypes().length;
-        if (parameterCount == 1) {
-            if (returnType.equals(Void.TYPE))
-                return MethodType.SET;
-        }
-        else if (parameterCount == 0) {
-            if (returnType.equals(Action1.class))
-                return MethodType.ACTION;
-            if (returnType.equals(Observable.class))
-                return MethodType.OBSERVABLE;
+        if (returnVoid && parameterCount == 1)
+            return MethodType.SET;
+        if (!returnVoid && parameterCount == 0) {
+            if (rx) {
+                if (returnType.equals(Action1.class))
+                    return MethodType.ACTION;
+                if (returnType.equals(Observable.class))
+                    return MethodType.OBSERVABLE;
+            }
             return MethodType.GET;
         }
-        throw Util.illegalMethodException(method, "Unable to detect a method type");
-    }
-
-    private static void assertParametrized(Method method, Type type) {
-        if (!(type instanceof ParameterizedType))
-            Util.throwMethod(method, "Parameter type expected to be Set<String>");
+        throw illegalMethodException(method, "Unable to detect a method type");
     }
 
     private static DataType dataTypeFromGenericReturnType(Method method) {
         Type returnType = method.getGenericReturnType();
-        assertParametrized(method, returnType);
+        if (!(returnType instanceof ParameterizedType))
+            throw illegalMethodException(method, "Invalid shared preferences type");
         ParameterizedType parameterizedType = (ParameterizedType)returnType;
-        return DataType.fromClass((Class<?>)parameterizedType.getActualTypeArguments()[0], parameterizedType.getActualTypeArguments()[0]);
+        Type arg0 = parameterizedType.getActualTypeArguments()[0];
+        return DataType.fromClass((Class<?>)(arg0 instanceof Class ? arg0 : ((ParameterizedType)arg0).getRawType()), arg0);
     }
 
-    public final boolean isSet;
+    private final boolean isSet;
 
     MethodType(boolean isSet) {
         this.isSet = isSet;
@@ -116,6 +107,9 @@ enum MethodType {
         return (name.length() > 3 && name.startsWith(isSet ? "set" : "get")) ?
             name.substring(3, 4).toLowerCase() + (name.length() > 4 ? name.substring(4) : "") :
             name;
+    }
 
+    private static IllegalArgumentException illegalMethodException(Method method, String error) {
+        throw new IllegalArgumentException("Method: " + method.getDeclaringClass().getName() + "." + method.getName() + "\n" + error);
     }
 }

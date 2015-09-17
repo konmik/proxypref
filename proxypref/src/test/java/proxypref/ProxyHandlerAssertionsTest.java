@@ -1,5 +1,6 @@
 package proxypref;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -7,103 +8,88 @@ import org.junit.rules.ExpectedException;
 
 import java.util.Set;
 
-import rx.Observable;
-import rx.functions.Action1;
-
 public class ProxyHandlerAssertionsTest {
 
     interface TotallyFailed {
+        void no_arg_void_return();
+        Integer arg_and_return(Integer x);
+        void two_args(Integer x, Integer y);
 
-        void methodTypeCanNotBeDetected();
-        Integer methodTypeCanNotBeDetectedArgumentAndReturn(Integer x);
-        void methodTypeCanNotBeDetectedTooManyArguments(Integer x, Integer y);
+        Double illegal_return_type();
+        void illegal_arg_type(Double x);
 
-        Double illegalReturnType();
-        void illegalSetArgument(Double x);
-
-        Set<Double> illegalReturnSetParameter();
-        void illegalSetArgumentParameter(Set<Double> x);
-
-        Observable<Double> illegalObservableType();
-        Observable<Set<Double>> illegalObservableSetParameter();
-
-        Action1<Double> illegalActionType();
-        Action1<Set<Double>> illegalActionSetParameter();
+        Set not_parametrized_return_set_type();
+        void not_parametrized_argument_set_type(Set x);
+        Set<Double> illegal_return_set_type();
+        void illegal_argument_set_type(Set<Double> x);
     }
 
-    TotallyFailed test;
-
     @Rule public ExpectedException expected = ExpectedException.none();
+
+    TotallyFailed test;
 
     @Before
     public void setUp() throws Exception {
         test = ProxyPreferences.build(TotallyFailed.class, null);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        ProxyHandler.clearCache();
+    }
+
     @Test
-    public void test_methodTypeCanNotBeDetected() throws Exception {
+    public void no_arg_void_return_throws() throws Exception {
         expect("Unable to detect a method type");
-        test.methodTypeCanNotBeDetected();
+        test.no_arg_void_return();
     }
 
     @Test
-    public void test_methodTypeCanNotBeDetectedArgumentAndReturn() throws Exception {
+    public void arg_and_return_throws() throws Exception {
         expect("Unable to detect a method type");
-        test.methodTypeCanNotBeDetectedArgumentAndReturn(1);
+        test.arg_and_return(1);
     }
 
     @Test
-    public void test_methodTypeCanNotBeDetectedTooManyArguments() throws Exception {
+    public void two_args_throws() throws Exception {
         expect("Unable to detect a method type");
-        test.methodTypeCanNotBeDetectedTooManyArguments(1, 1);
+        test.two_args(1, 1);
     }
 
     @Test
-    public void test_illegalReturnType() throws Exception {
+    public void illegal_return_type_throws() throws Exception {
         expect("Invalid shared preferences type");
-        test.illegalReturnType();
+        test.illegal_return_type();
     }
 
     @Test
-    public void test_illegalSetArgument() throws Exception {
+    public void illegal_arg_type_throws() throws Exception {
         expect("Invalid shared preferences type");
-        test.illegalSetArgument(1d);
+        test.illegal_arg_type(1d);
     }
 
     @Test
-    public void test_illegalReturnSetParameter() throws Exception {
-        expect("Set<String>");
-        test.illegalReturnSetParameter();
-    }
-
-    @Test
-    public void test_illegalSetArgumentParameter() throws Exception {
-        expect("Set<String>");
-        test.illegalSetArgumentParameter(null);
-    }
-
-    @Test
-    public void test_illegalObservableType() throws Exception {
+    public void not_parametrized_return_set_type() throws Exception {
         expect("Invalid shared preferences type");
-        test.illegalObservableType();
+        test.not_parametrized_return_set_type();
     }
 
     @Test
-    public void test_illegalObservableSetParameter() throws Exception {
-        expect("Set<String>");
-        test.illegalObservableSetParameter();
-    }
-
-    @Test
-    public void test_illegalActionType() throws Exception {
+    public void not_parametrized_argument_set_type() throws Exception {
         expect("Invalid shared preferences type");
-        test.illegalActionType();
+        test.not_parametrized_argument_set_type(null);
     }
 
     @Test
-    public void test_illegalActionSetParameter() throws Exception {
-        expect("Set<String>");
-        test.illegalActionSetParameter();
+    public void illegal_return_set_type_throws() throws Exception {
+        expect("Invalid shared preferences type");
+        test.illegal_return_set_type();
+    }
+
+    @Test
+    public void illegal_argument_set_type_throws() throws Exception {
+        expect("Invalid shared preferences type");
+        test.illegal_argument_set_type(null);
     }
 
     private void expect(String substring) {

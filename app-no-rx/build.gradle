@@ -19,7 +19,6 @@ android {
 
 dependencies {
     compile project(':proxypref')
-    compile 'io.reactivex:rxjava:1.0.14'
     androidTestCompile 'com.android.support.test:runner:0.4'
     androidTestCompile 'com.android.support.test:rules:0.4'
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'

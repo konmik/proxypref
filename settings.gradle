@@ -1,1 +1,1 @@
-include ':app', ':proxypref'
+include ':proxypref', ':app', ':app-no-rx'

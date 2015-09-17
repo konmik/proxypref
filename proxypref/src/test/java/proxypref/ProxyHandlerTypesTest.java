@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 
 import org.junit.Test;
 import org.mockito.InOrder;
-import org.mockito.Mockito;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,11 +18,11 @@ import static org.mockito.Matchers.anyFloat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-import static proxypref.TestUtil.answerValue;
+import static proxypref.TestUtil.answerMapValue;
 
 public class ProxyHandlerTypesTest {
 
@@ -45,12 +44,6 @@ public class ProxyHandlerTypesTest {
     @Test
     public void testTypes() throws Exception {
         testType("string", "setValue", "getValue",
-            new Func1<SharedPreferences, String>() {
-                @Override
-                public String call(SharedPreferences preferences) {
-                    return preferences.getString(eq("string"), anyString());
-                }
-            },
             new Func1<SharedPreferences.Editor, SharedPreferences.Editor>() {
                 @Override
                 public SharedPreferences.Editor call(SharedPreferences.Editor editor) {
@@ -76,12 +69,6 @@ public class ProxyHandlerTypesTest {
                 }
             });
         testType("int", 1, 2,
-            new Func1<SharedPreferences, Integer>() {
-                @Override
-                public Integer call(SharedPreferences preferences) {
-                    return preferences.getInt(eq("int"), anyInt());
-                }
-            },
             new Func1<SharedPreferences.Editor, SharedPreferences.Editor>() {
                 @Override
                 public SharedPreferences.Editor call(SharedPreferences.Editor editor) {
@@ -107,12 +94,6 @@ public class ProxyHandlerTypesTest {
                 }
             });
         testType("long", 1l, 2l,
-            new Func1<SharedPreferences, Long>() {
-                @Override
-                public Long call(SharedPreferences preferences) {
-                    return preferences.getLong(eq("long"), anyLong());
-                }
-            },
             new Func1<SharedPreferences.Editor, SharedPreferences.Editor>() {
                 @Override
                 public SharedPreferences.Editor call(SharedPreferences.Editor editor) {
@@ -138,12 +119,6 @@ public class ProxyHandlerTypesTest {
                 }
             });
         testType("float", 1f, 2f,
-            new Func1<SharedPreferences, Float>() {
-                @Override
-                public Float call(SharedPreferences preferences) {
-                    return preferences.getFloat(eq("float"), anyFloat());
-                }
-            },
             new Func1<SharedPreferences.Editor, SharedPreferences.Editor>() {
                 @Override
                 public SharedPreferences.Editor call(SharedPreferences.Editor editor) {
@@ -169,12 +144,6 @@ public class ProxyHandlerTypesTest {
                 }
             });
         testType("boolean", true, false,
-            new Func1<SharedPreferences, Boolean>() {
-                @Override
-                public Boolean call(SharedPreferences preferences) {
-                    return preferences.getBoolean(eq("boolean"), anyBoolean());
-                }
-            },
             new Func1<SharedPreferences.Editor, SharedPreferences.Editor>() {
                 @Override
                 public SharedPreferences.Editor call(SharedPreferences.Editor editor) {
@@ -200,12 +169,6 @@ public class ProxyHandlerTypesTest {
                 }
             });
         testType("set", new HashSet<String>(), new HashSet<String>(),
-            new Func1<SharedPreferences, Set<String>>() {
-                @Override
-                public Set<String> call(SharedPreferences preferences) {
-                    return preferences.getStringSet(eq("set"), any(Set.class));
-                }
-            },
             new Func1<SharedPreferences.Editor, SharedPreferences.Editor>() {
                 @Override
                 public SharedPreferences.Editor call(SharedPreferences.Editor editor) {
@@ -233,21 +196,19 @@ public class ProxyHandlerTypesTest {
     }
 
     private <T> void testType(String methodName, T getValue, T setValue,
-        Func1<SharedPreferences, T> whenGet,
         Func1<SharedPreferences.Editor, SharedPreferences.Editor> whenPut,
         Action2<SharedPreferences.Editor, T> verifyPut,
         Func1<TestTypes, T> doGet, Action2<TestTypes, T> doSet) {
 
-        SharedPreferences pref = Mockito.mock(SharedPreferences.class);
+        SharedPreferences pref = mock(SharedPreferences.class);
         TestTypes test = ProxyPreferences.build(TestTypes.class, pref);
 
-        when(pref.contains(methodName)).thenReturn(true);
-        when(whenGet.call(pref))
-            .thenAnswer(answerValue(methodName, getValue));
+        when(pref.getAll())
+            .thenAnswer(answerMapValue(methodName, getValue));
 
         assertEquals(getValue, doGet.call(test));
 
-        SharedPreferences.Editor editor = Mockito.mock(SharedPreferences.Editor.class);
+        SharedPreferences.Editor editor = mock(SharedPreferences.Editor.class);
         when(pref.edit())
             .thenReturn(editor);
         when(whenPut.call(editor))

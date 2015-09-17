@@ -11,8 +11,8 @@ public class MethodInfo {
     private final String key;
     private final Object defValue;
 
-    public MethodInfo(Method method) {
-        this.methodType = MethodType.from(method);
+    public MethodInfo(Method method, boolean rx) {
+        this.methodType = MethodType.from(method, rx);
         this.dataType = methodType.getDataType(method);
         this.key = methodType.getKey(method);
         this.defValue = dataType.getDefaultValue(method);

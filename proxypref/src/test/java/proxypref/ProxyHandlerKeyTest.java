@@ -1,47 +1,67 @@
 package proxypref;
 
+import android.content.SharedPreferences;
+
 import org.junit.Test;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import proxypref.annotation.Preference;
 
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ProxyHandlerKeyTest {
 
     interface NameTests {
         String g();
         String get();
-        void setCamelCase(String a);
         String getALLBIG();
         String methodGet2();
-        void methodSet2(String a);
         @Preference("customName1")
         String methodCustom1();
+
+        void setCamelCase(String a);
+        void methodSet2(String a);
         @Preference("customName2")
         void methodCustom2(String a);
     }
 
     @Test
-    public void testName() throws Exception {
-        assertEquals("g", getMethodKey("g"));
-        assertEquals("get", getMethodKey("get"));
-        assertEquals("camelCase", getMethodKey("setCamelCase", String.class));
-        assertEquals("aLLBIG", getMethodKey("getALLBIG"));
-        assertEquals("methodGet2", getMethodKey("methodGet2"));
-        assertEquals("methodSet2", getMethodKey("methodSet2", String.class));
-        assertEquals("customName1", getMethodKey("methodCustom1"));
-        assertEquals("customName2", getMethodKey("methodCustom2", String.class));
+    public void testName() throws Throwable {
+        verifyGetMethodToKey("g", "g");
+        verifyGetMethodToKey("get", "get");
+        verifyGetMethodToKey("getALLBIG", "aLLBIG");
+        verifyGetMethodToKey("methodGet2", "methodGet2");
+        verifyGetMethodToKey("methodCustom1", "customName1");
+
+        verifyPutMethodToKey("setCamelCase", "camelCase");
+        verifyPutMethodToKey("methodSet2", "methodSet2");
+        verifyPutMethodToKey("methodCustom2", "customName2");
     }
 
-    private String getMethodKey(String name) throws NoSuchMethodException {
-        Method method = NameTests.class.getDeclaredMethod(name);
-        return ProxyHandler.getPreferenceKey(ProxyHandler.getMethodType(method), method);
+    private void verifyGetMethodToKey(String methodName, String expectedKey) throws Throwable {
+        SharedPreferences pref = mock(SharedPreferences.class);
+        Map map = mock(Map.class);
+        when(pref.getAll()).thenReturn(map);
+        Method method = NameTests.class.getDeclaredMethod(methodName);
+        new ProxyHandler(pref, false).invoke(NameTests.class, method, new Object[0]);
+        verify(map).get(expectedKey);
     }
 
-    private String getMethodKey(String name, Class<?>... parameterTypes) throws NoSuchMethodException {
-        Method method = NameTests.class.getDeclaredMethod(name, parameterTypes);
-        return ProxyHandler.getPreferenceKey(ProxyHandler.getMethodType(method), method);
+    private void verifyPutMethodToKey(String methodName, String expectedKey) throws Throwable {
+        SharedPreferences pref = mock(SharedPreferences.class);
+        Method method = NameTests.class.getDeclaredMethod(methodName, String.class);
+
+        SharedPreferences.Editor editor = TestUtil.mockEditor(pref);
+
+        new ProxyHandler(pref, false).invoke(NameTests.class, method, new Object[]{""});
+
+        verify(editor, times(1)).putString(eq(expectedKey), anyString());
     }
 }
