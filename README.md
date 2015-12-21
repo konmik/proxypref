@@ -75,6 +75,10 @@ MyPreferences pref = ProxyPreferences
 
 If you want to have RxJava features. Don't forget to include RxJava itself. ;)
 
+##### RxJava warning
+
+Keep hard references to RxJava subscriptions otherwise they can be GC'ed due to the `SharedPreferences` bug.
+
 ### Dependency
 
 ``` guava
